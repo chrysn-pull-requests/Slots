@@ -174,9 +174,16 @@ impl<IT, N> Slots<IT, N>
     }
 
     pub fn modify<T, F>(&mut self, key: &Key<IT, N>, function: F) -> T where F: FnOnce(&mut IT) -> T {
-        match self.items[key.index] {
-            Entry::Used(ref mut item) => function(item),
-            _ => panic!()
+        match self.try_modify(key.index, function) {
+            Some(t) => t,
+            None => panic!()
+        }
+    }
+
+    pub fn try_modify<T, F>(&mut self, key: usize, function: F) -> Option<T> where F: FnOnce(&mut IT) -> T {
+        match self.items[key] {
+            Entry::Used(ref mut item) => Some(function(item)),
+            _ => None,
         }
     }
 }
